@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'djoser',
     'users',
     'api',
+    'recipes',
 ]
 
 AUTH_USER_MODEL = 'users.CustomUser'
