@@ -16,3 +16,4 @@ class CustomUserViewSet(UserViewSet):
 class TagViewSet(ModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
+    pagination_class = None
