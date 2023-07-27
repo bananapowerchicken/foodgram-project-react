@@ -40,8 +40,9 @@ class TagSerializer(serializers.ModelSerializer):
 
 class IngredientInRecipeSerializer(serializers.ModelSerializer):
     # определяем поля из модели ингредиента ручками
-    name = serializers.CharField(source='ingredient.name')
-    measurement_unit = serializers.CharField(source='ingredient.measurement_unit')
+    name = serializers.ReadOnlyField(source='ingredient.name')
+    measurement_unit = serializers.ReadOnlyField(source='ingredient.measurement_unit')
+    id = serializers.ReadOnlyField(source='ingredient.id ')
 
     class Meta:
         model = IngredientInRecipe
