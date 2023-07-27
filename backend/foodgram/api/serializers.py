@@ -39,7 +39,7 @@ class TagSerializer(serializers.ModelSerializer):
 # тег - список tag objects
 
 class RecipeSerializer(serializers.ModelSerializer):
-    tags = TagSerializer(many=True)  # это рабочий фикс тегов
+    tags = TagSerializer(many=True)  # это рабочий фикс  вывода тегов
     # author = CustomUserSerializer(many=True)
     class Meta:
         model = Recipe
