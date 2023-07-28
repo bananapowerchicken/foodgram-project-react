@@ -1,8 +1,15 @@
-from users.models import CustomUser
+from users.models import CustomUser, Subscribe
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from rest_framework.fields import SerializerMethodField
 from rest_framework import serializers
 from recipes.models import Tag, Recipe, IngredientInRecipe
+from rest_framework.relations import SlugRelatedField
+from django.contrib.auth import get_user_model
+from rest_framework.exceptions import ValidationError
+from rest_framework import status
+
+
+User = get_user_model()
 
 # сериалайзеры отвечают, например, за выводлимый вид в postman рез-та запроса
 
@@ -15,7 +22,7 @@ class CustomUserCreateSerializer(UserCreateSerializer):
         )
 
 class CustomUserSerializer(UserSerializer):
-    # is_subscribed = SerializerMethodField(read_only=True)
+    is_subscribed = SerializerMethodField(read_only=True)
 
     class Meta:
         model = CustomUser
@@ -25,8 +32,36 @@ class CustomUserSerializer(UserSerializer):
             'username',
             'first_name',
             'last_name',
-            # 'is_subscribed',
+            'is_subscribed',
         )
+    
+    def get_is_subscribed(self, obj):
+        user = self.context.get('request').user
+        if user.is_anonymous:
+            return False
+        return Subscribe.objects.filter(subscriber=user, author=obj).exists()
+
+class SubscribeSerializer(CustomUserSerializer):
+
+    class Meta(CustomUserSerializer.Meta):
+        # model = Subscribe        
+        fields = CustomUserSerializer.Meta.fields
+        read_only_fields = ('email', 'username')
+
+    def validate(self, data):
+        author = self.instance
+        user = self.context.get('request').user
+        if Subscribe.objects.filter(author=author, subscriber=user).exists():
+            raise ValidationError(
+                detail='Вы уже подписаны на этого пользователя!',
+                code=status.HTTP_400_BAD_REQUEST
+            )
+        if user == author:
+            raise ValidationError(
+                detail='Вы не можете подписаться на самого себя!',
+                code=status.HTTP_400_BAD_REQUEST
+            )
+        return data
 
 class TagSerializer(serializers.ModelSerializer):
     
