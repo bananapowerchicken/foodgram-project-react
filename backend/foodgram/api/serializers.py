@@ -46,7 +46,8 @@ class SubscribeSerializer(CustomUserSerializer):
     class Meta(CustomUserSerializer.Meta):
         # model = Subscribe        
         fields = CustomUserSerializer.Meta.fields
-        read_only_fields = ('email', 'username')
+        read_only_fields = ('email', 'username', 'first_name',
+            'last_name',)
 
     def validate(self, data):
         author = self.instance
