@@ -42,7 +42,35 @@ class CustomUserViewSet(UserViewSet):
                                              author=author)
             subscription.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    # подумат над списком подписок
+    @action(
+        detail=False,
+        # permission_classes=[IsAuthenticated]
+        methods = ['get']
+    )
+    def subscriptions(self, request):
+        # user = request.user
+        # # queryset = CustomUser.objects.filter(follower_user=user)
+        # # queryset = CustomUser.all()
+        # authors = Subscribe.objects.filter(subscriber=user)
+        # print(authors[0].author.first_name)
         
+        # queryset = authors  #.following.all()
+        # pages = self.paginate_queryset(queryset)
+        # # pages = queryset
+        # serializer = SubscribeSerializer(pages,
+        #                                  many=True,
+        #                                  context={'request': request})
+        # return self.get_paginated_response(serializer.data)
+
+        user = request.user
+        queryset = CustomUser.objects.filter(following__subscriber=user)
+        pages = self.paginate_queryset(queryset)
+        serializer = SubscribeSerializer(pages,
+                                         many=True,
+                                         context={'request': request})
+        return self.get_paginated_response(serializer.data)
 
 
 class TagViewSet(ModelViewSet):

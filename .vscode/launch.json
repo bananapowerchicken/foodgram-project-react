@@ -1,0 +1,22 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+
+        
+        {
+            "name": "Python: Django",
+            "type": "python",
+            "request": "launch",
+            "python": "D:/code/yandex_practicum_python/sprint16_diplom/foodgram2/foodgram-project-react/backend/venv/Scripts/python.exe",
+            "program": "${workspaceFolder}\\backend\\foodgram\\manage.py",
+            "args": [
+                "runserver"
+            ],
+            "django": true,
+            "justMyCode": true
+        }
+    ]
+}
