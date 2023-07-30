@@ -2,7 +2,7 @@ from users.models import CustomUser, Subscribe
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from rest_framework.fields import SerializerMethodField
 from rest_framework import serializers
-from recipes.models import Tag, Recipe, IngredientInRecipe
+from recipes.models import Tag, Recipe, Ingredient, IngredientInRecipe
 from rest_framework.relations import SlugRelatedField
 from django.contrib.auth import get_user_model
 from rest_framework.exceptions import ValidationError
@@ -68,6 +68,12 @@ class TagSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Tag
+        fields = '__all__'
+
+class IngredientSerializer(serializers.ModelSerializer):
+        
+    class Meta:
+        model = Ingredient
         fields = '__all__'
 
 # вот тут по умолчанию выводятся id автора и тегов, это нужно пофиксить

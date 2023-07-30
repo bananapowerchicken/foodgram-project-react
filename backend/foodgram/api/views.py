@@ -1,9 +1,9 @@
 from django.shortcuts import render
 from django.contrib.auth import get_user_model
-from .serializers import CustomUserSerializer, TagSerializer, RecipeSerializer, SubscribeSerializer
+from .serializers import CustomUserSerializer, TagSerializer, RecipeSerializer, SubscribeSerializer, IngredientSerializer
 from djoser.views import UserViewSet
 from rest_framework.viewsets import ModelViewSet
-from recipes.models import Tag, Recipe
+from recipes.models import Tag, Recipe, Ingredient
 from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
 from users.models import Subscribe
@@ -77,6 +77,12 @@ class TagViewSet(ModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     pagination_class = None
+
+class IngredientViewSet(ModelViewSet):
+    http_method_names = ('get')
+    queryset = Ingredient.objects.all()
+    serializer_class = IngredientSerializer
+    # pagination_class = None
 
 class RecipeViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
