@@ -7,6 +7,7 @@ from rest_framework.relations import SlugRelatedField
 from django.contrib.auth import get_user_model
 from rest_framework.exceptions import ValidationError
 from rest_framework import status
+from drf_extra_fields.fields import Base64ImageField
 
 
 User = get_user_model()
@@ -90,12 +91,15 @@ class IngredientInRecipeSerializer(serializers.ModelSerializer):
         model = IngredientInRecipe
         fields = ('id', 'name', 'measurement_unit', 'amount')
 
+
+# по сути это просмотр рецепта
 class RecipeSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True)  # это рабочий фикс  вывода тегов
     # замена истояника получения данных, был - модкль рецепта, стал - ингр в рецепте
     # чтобы получить ингредиент - используй атрибут в source от recipe
     # вебинар 1:15:25
     ingredient = IngredientInRecipeSerializer(many=True, source='ingredientinrecipe_set')
+    image = Base64ImageField()
     # author = CustomUserSerializer(many=True)
     class Meta:
         model = Recipe

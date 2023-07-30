@@ -26,6 +26,7 @@ class Recipe(models.Model):
     # through_fields=('recipe', 'ingredient')
     ingredient = models.ManyToManyField(Ingredient, 
                                         through='IngredientInRecipe')
+    image = models.ImageField(upload_to='recipes/')
 
 class IngredientInRecipe(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
