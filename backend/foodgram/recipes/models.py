@@ -15,7 +15,7 @@ class Ingredient(models.Model):
 # пока только тэги и автор
 class Recipe(models.Model):
     tags = models.ManyToManyField(Tag)
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     name = models.CharField(max_length=200)
     text = models.TextField()
     cooking_time = models.PositiveIntegerField()  # дб больше 1 - валидатор

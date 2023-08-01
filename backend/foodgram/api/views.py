@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.contrib.auth import get_user_model
-from .serializers import CustomUserSerializer, TagSerializer, RecipeSerializer, SubscribeSerializer, IngredientSerializer
+from .serializers import CustomUserSerializer, TagSerializer, RecipeSerializer, RecipeCreateSerializer, SubscribeSerializer, IngredientSerializer
 from djoser.views import UserViewSet
 from rest_framework.viewsets import ModelViewSet
 from recipes.models import Tag, Recipe, Ingredient
@@ -86,4 +86,11 @@ class IngredientViewSet(ModelViewSet):
 
 class RecipeViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
-    serializer_class = RecipeSerializer
+    # serializer_class = RecipeSerializer
+    
+    def get_serializer_class(self):
+        # if self.request.method == 'POST':
+        #     return RecipeCreateSerializer
+        return RecipeSerializer
+    
+    # serializer_class = get_serializer_class(self)
