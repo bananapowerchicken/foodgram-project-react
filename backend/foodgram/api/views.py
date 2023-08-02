@@ -89,9 +89,8 @@ class RecipeViewSet(ModelViewSet):
     # serializer_class = RecipeSerializer
     
     def get_serializer_class(self):
-        if self.request.method == 'POST':
-            return RecipeCreateSerializer
-            # return RecipeWriteSerializer
+        if self.request.method == 'POST' or self.request.method == 'PATCH':
+            return RecipeCreateSerializer            
         return RecipeSerializer
     
     # serializer_class = get_serializer_class(self)
