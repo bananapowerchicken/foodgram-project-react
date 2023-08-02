@@ -21,3 +21,4 @@ python-dotenv
 psycopg2-binary==2.9.3
 pillow
 django-extra-fields
+reportlab

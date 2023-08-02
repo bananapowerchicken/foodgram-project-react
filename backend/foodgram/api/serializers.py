@@ -117,6 +117,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     image = Base64ImageField()
     author = CustomUserSerializer(read_only=True)
     is_favorited = SerializerMethodField(read_only=True)
+    is_in_shopping_cart = SerializerMethodField(read_only=True)
 
     class Meta:
         model = Recipe
@@ -128,6 +129,11 @@ class RecipeSerializer(serializers.ModelSerializer):
             return False
         return user.favorites.filter(recipe=obj).exists()
 
+    def get_is_in_shopping_cart(self, obj):
+        user = self.context.get('request').user
+        if user.is_anonymous:
+            return False
+        return user.shopping_cart.filter(recipe=obj).exists()
 
 class RecipeCreateSerializer(serializers.ModelSerializer):
 

@@ -7,10 +7,12 @@ from recipes.models import Tag, Recipe, Ingredient
 from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
 from users.models import Subscribe
-from recipes.models import Favorite
+from recipes.models import Favorite, ShoppingCart
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework import mixins, viewsets
+from reportlab.pdfgen import canvas  
+from django.http import HttpResponse
+
 
 
 CustomUser = get_user_model()
@@ -51,20 +53,6 @@ class CustomUserViewSet(UserViewSet):
         methods = ['get']
     )
     def subscriptions(self, request):
-        # user = request.user
-        # # queryset = CustomUser.objects.filter(follower_user=user)
-        # # queryset = CustomUser.all()
-        # authors = Subscribe.objects.filter(subscriber=user)
-        # print(authors[0].author.first_name)
-        
-        # queryset = authors  #.following.all()
-        # pages = self.paginate_queryset(queryset)
-        # # pages = queryset
-        # serializer = SubscribeSerializer(pages,
-        #                                  many=True,
-        #                                  context={'request': request})
-        # return self.get_paginated_response(serializer.data)
-
         user = request.user
         queryset = CustomUser.objects.filter(following__subscriber=user)
         pages = self.paginate_queryset(queryset)
@@ -95,17 +83,6 @@ class RecipeViewSet(ModelViewSet):
         return RecipeSerializer
     
     # serializer_class = get_serializer_class(self)
-
-    
-    @action(
-            detail=True,
-            methods=['post', 'delete'],
-    )
-    def favorite(self, request, pk):
-        if request.method == 'POST':
-            return self.add_to(Favorite, request.user, pk)
-        else:
-            return self.delete_from(Favorite, request.user, pk)
     
     def add_to(self, model, user, pk):
         if model.objects.filter(user=user, recipe__id=pk).exists():
@@ -123,3 +100,39 @@ class RecipeViewSet(ModelViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response({'errors': 'Этого рецепта не существует'},
                         status=status.HTTP_400_BAD_REQUEST)
+
+    @action(
+            detail=True,
+            methods=['post', 'delete'],
+    )
+    def favorite(self, request, pk):
+        if request.method == 'POST':
+            return self.add_to(Favorite, request.user, pk)
+        else:
+            return self.delete_from(Favorite, request.user, pk)
+    
+    @action(
+            detail=True,
+            methods=['post', 'delete'],
+    )
+    def shopping_cart(self, request, pk):
+        if request.method == 'POST':
+            return self.add_to(ShoppingCart, request.user, pk)
+        else:
+            return self.delete_from(ShoppingCart, request.user, pk)
+    
+    @staticmethod
+    def getpdf(request): 
+        response = HttpResponse(content_type='application/pdf') 
+        response['Content-Disposition'] = 'attachment; filename="file.pdf"' 
+        p = canvas.Canvas(response) 
+        p.setFont("Times-Roman", 55) 
+        p.drawString(100,700, "Hello, Javatpoint.") 
+        p.showPage() 
+        p.save() 
+        return response
+
+    @action(detail=False)
+    def download_shopping_cart(self, request):
+        # queryset = []
+        return self.getpdf(request)
