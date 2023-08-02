@@ -99,6 +99,13 @@ class IngredientInRecipeWriteSerializer(serializers.ModelSerializer):
         model = IngredientInRecipe
         fields = ('id', 'amount')
 
+class RecipeShortSerializer(serializers.ModelSerializer):
+    image = Base64ImageField()
+
+    class Meta:
+        model = Recipe
+        fields = ('id', 'name', 'image', 'cooking_time')
+
 # по сути это просмотр рецепта
 class RecipeSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True)  # это рабочий фикс  вывода тегов
@@ -109,9 +116,17 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     image = Base64ImageField()
     author = CustomUserSerializer(read_only=True)
+    is_favorited = SerializerMethodField(read_only=True)
+
     class Meta:
         model = Recipe
         fields = '__all__'
+
+    def get_is_favorited(self, obj):
+        user = self.context.get('request').user
+        if user.is_anonymous:
+            return False
+        return user.favorites.filter(recipe=obj).exists()
 
 
 class RecipeCreateSerializer(serializers.ModelSerializer):

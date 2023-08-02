@@ -1,12 +1,13 @@
 from django.shortcuts import render
 from django.contrib.auth import get_user_model
-from .serializers import CustomUserSerializer, TagSerializer, RecipeSerializer, RecipeCreateSerializer, SubscribeSerializer, IngredientSerializer
+from .serializers import CustomUserSerializer, RecipeShortSerializer, TagSerializer, RecipeSerializer, RecipeCreateSerializer, SubscribeSerializer, IngredientSerializer
 from djoser.views import UserViewSet
 from rest_framework.viewsets import ModelViewSet
 from recipes.models import Tag, Recipe, Ingredient
 from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
 from users.models import Subscribe
+from recipes.models import Favorite
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import mixins, viewsets
@@ -94,3 +95,31 @@ class RecipeViewSet(ModelViewSet):
         return RecipeSerializer
     
     # serializer_class = get_serializer_class(self)
+
+    
+    @action(
+            detail=True,
+            methods=['post', 'delete'],
+    )
+    def favorite(self, request, pk):
+        if request.method == 'POST':
+            return self.add_to(Favorite, request.user, pk)
+        else:
+            return self.delete_from(Favorite, request.user, pk)
+    
+    def add_to(self, model, user, pk):
+        if model.objects.filter(user=user, recipe__id=pk).exists():
+            return Response({'errors': 'Этот рецепт уже добавлен'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        recipe = get_object_or_404(Recipe, id=pk)
+        model.objects.create(user=user, recipe=recipe)
+        serializer = RecipeShortSerializer(recipe)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def delete_from(self, model, user, pk):
+        obj = model.objects.filter(user=user, recipe__id=pk)
+        if obj.exists():
+            obj.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response({'errors': 'Этого рецепта не существует'},
+                        status=status.HTTP_400_BAD_REQUEST)
