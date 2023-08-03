@@ -125,7 +125,7 @@ class RecipeViewSet(ModelViewSet):
             return self.delete_from(ShoppingCart, request.user, pk)
     
     @staticmethod
-    def getpdf(recipe_info):
+    def getpdf(recipe_info, recipe_name):
         # pdfmetrics.registerFont(
 
             # TTFont( 'utf-8'))
@@ -137,9 +137,11 @@ class RecipeViewSet(ModelViewSet):
         p = canvas.Canvas(response)      
         # p.add_font('DejaVuSans', 'DejaVuSans.ttf', 'utf-8')
         p.setFont("TNR", 20) 
-        p.drawString(150,900, "Shopping list")
+        # p.drawString(150,900, "Shopping list")
         
         text_object = p.beginText(100, 750)
+        # name_of_recipe = recipe_name.values()[0]
+        text_object.textLine(f'Список ингредиентов для блюда {recipe_name}')
         counter = 1
         for ingredient, unit, amount in recipe_info:
             text_object.textLine(
@@ -161,9 +163,17 @@ class RecipeViewSet(ModelViewSet):
     def download_shopping_cart(self, request):
         # recipe_info = IngredientInRecipe(pk=1)
         # recipe_info = IngredientInRecipe.objects.filter(pk=1)
+        
         recipe_info = IngredientInRecipe.objects.filter(
             recipe__shopping_cart__user=request.user
         ).values_list(
             'ingredient__name', 'ingredient__measurement_unit'
         ).annotate(Sum('amount')).order_by('ingredient__name')
-        return self.getpdf(recipe_info)
+        
+        recipe_name = IngredientInRecipe.objects.filter(
+            recipe__shopping_cart__user=request.user
+        ).values('recipe__name').first()['recipe__name']
+
+        # recipe_name = recipe_name['recipe__name']
+
+        return self.getpdf(recipe_info, recipe_name)
