@@ -1,15 +1,14 @@
-from users.models import CustomUser, Subscribe
-from djoser.serializers import UserCreateSerializer, UserSerializer
-from rest_framework.fields import SerializerMethodField, IntegerField
-from rest_framework import serializers
-from recipes.models import Tag, Recipe, Ingredient, IngredientInRecipe
-from rest_framework.relations import SlugRelatedField, PrimaryKeyRelatedField
 from django.contrib.auth import get_user_model
-from rest_framework.exceptions import ValidationError
-from rest_framework import status
-from drf_extra_fields.fields import Base64ImageField
 from django.shortcuts import get_object_or_404
+from djoser.serializers import UserCreateSerializer, UserSerializer
+from drf_extra_fields.fields import Base64ImageField
+from rest_framework import serializers, status
+from rest_framework.exceptions import ValidationError
+from rest_framework.fields import IntegerField, SerializerMethodField
+from rest_framework.relations import PrimaryKeyRelatedField, SlugRelatedField
 
+from recipes.models import Ingredient, IngredientInRecipe, Recipe, Tag
+from users.models import CustomUser, Subscribe
 
 User = get_user_model()
 

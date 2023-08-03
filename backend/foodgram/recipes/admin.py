@@ -1,5 +1,7 @@
 from django.contrib import admin
-from .models import Tag, Recipe, Ingredient, IngredientInRecipe
+
+from .models import Ingredient, IngredientInRecipe, Recipe, Tag
+
 
 # фича джанго
 # позволит нам внедрить ингредиенты в рецепты без прокидывания в админку промежуточной таблицы

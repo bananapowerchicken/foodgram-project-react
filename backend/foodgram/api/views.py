@@ -1,22 +1,24 @@
-from django.shortcuts import render
 from django.contrib.auth import get_user_model
-from .serializers import CustomUserSerializer, RecipeShortSerializer, TagSerializer, RecipeSerializer, RecipeCreateSerializer, SubscribeSerializer, IngredientSerializer
-from djoser.views import UserViewSet
-from rest_framework.viewsets import ModelViewSet
-from recipes.models import Tag, Recipe, Ingredient, IngredientInRecipe
-from rest_framework.decorators import action
-from django.shortcuts import get_object_or_404
-from users.models import Subscribe
-from recipes.models import Favorite, ShoppingCart
-from rest_framework.response import Response
-from rest_framework import status
-from reportlab.pdfgen import canvas  
-from django.http import HttpResponse
 from django.db.models import Sum
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, render
+from djoser.views import UserViewSet
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.pdfgen import canvas
+from rest_framework import status
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework.viewsets import ModelViewSet
 
+from recipes.models import (Favorite, Ingredient, IngredientInRecipe, Recipe,
+                            ShoppingCart, Tag)
+from users.models import Subscribe
 
+from .serializers import (CustomUserSerializer, IngredientSerializer,
+                          RecipeCreateSerializer, RecipeSerializer,
+                          RecipeShortSerializer, SubscribeSerializer,
+                          TagSerializer)
 
 CustomUser = get_user_model()
 

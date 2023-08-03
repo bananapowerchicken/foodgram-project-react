@@ -1,5 +1,5 @@
-from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.db import models
 
 
 class CustomUser(AbstractUser):
@@ -46,5 +46,7 @@ class CustomUser(AbstractUser):
  
 
 class Subscribe(models.Model):
+    """ Модель подписки на пользователя """
+    
     subscriber = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='follower')
     author = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='following')
