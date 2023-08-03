@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from .serializers import CustomUserSerializer, RecipeShortSerializer, TagSerializer, RecipeSerializer, RecipeCreateSerializer, SubscribeSerializer, IngredientSerializer
 from djoser.views import UserViewSet
 from rest_framework.viewsets import ModelViewSet
-from recipes.models import Tag, Recipe, Ingredient
+from recipes.models import Tag, Recipe, Ingredient, IngredientInRecipe
 from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
 from users.models import Subscribe
@@ -12,6 +12,9 @@ from rest_framework.response import Response
 from rest_framework import status
 from reportlab.pdfgen import canvas  
 from django.http import HttpResponse
+from django.db.models import Sum
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 
 
 
@@ -122,17 +125,45 @@ class RecipeViewSet(ModelViewSet):
             return self.delete_from(ShoppingCart, request.user, pk)
     
     @staticmethod
-    def getpdf(request): 
+    def getpdf(recipe_info):
+        # pdfmetrics.registerFont(
+
+            # TTFont( 'utf-8'))
+        # pdfmetrics.registerFont(TTFont('ExtraBold', 'extrabold.ttf', 'utf-8'))
+        pdfmetrics.registerFont(TTFont('TNR', 'times.ttf'))
         response = HttpResponse(content_type='application/pdf') 
-        response['Content-Disposition'] = 'attachment; filename="file.pdf"' 
-        p = canvas.Canvas(response) 
-        p.setFont("Times-Roman", 55) 
-        p.drawString(100,700, "Hello, Javatpoint.") 
+        response['Content-Disposition'] = 'attachment; filename="shopping-cart.pdf"' 
+        
+        p = canvas.Canvas(response)      
+        # p.add_font('DejaVuSans', 'DejaVuSans.ttf', 'utf-8')
+        p.setFont("TNR", 20) 
+        p.drawString(150,900, "Shopping list")
+        
+        text_object = p.beginText(100, 750)
+        counter = 1
+        for ingredient, unit, amount in recipe_info:
+            text_object.textLine(
+                f'{counter}. {ingredient} ({unit}) - {amount}'
+            )
+            counter += 1
+        p.drawText(text_object)
+        # text_object = p.beginText(100, 750)
+        # text_object.textLine(
+        #         # f'{counter}. {ingredient} ({unit}) - {amount}'
+        #         "hi barbie"
+        #     )
+
         p.showPage() 
         p.save() 
         return response
 
     @action(detail=False)
     def download_shopping_cart(self, request):
-        # queryset = []
-        return self.getpdf(request)
+        # recipe_info = IngredientInRecipe(pk=1)
+        # recipe_info = IngredientInRecipe.objects.filter(pk=1)
+        recipe_info = IngredientInRecipe.objects.filter(
+            recipe__shopping_cart__user=request.user
+        ).values_list(
+            'ingredient__name', 'ingredient__measurement_unit'
+        ).annotate(Sum('amount')).order_by('ingredient__name')
+        return self.getpdf(recipe_info)
