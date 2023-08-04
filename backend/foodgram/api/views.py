@@ -10,6 +10,9 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
+from .filters import RecipeFilter
+from django_filters.rest_framework import DjangoFilterBackend
+
 
 from recipes.models import (Favorite, Ingredient, IngredientInRecipe, Recipe,
                             ShoppingCart, Tag)
@@ -20,11 +23,12 @@ from .serializers import (CustomUserSerializer, IngredientSerializer,
                           RecipeShortSerializer, SubscribeSerializer,
                           TagSerializer)
 
-CustomUser = get_user_model()
+
+User = get_user_model()
 
 class CustomUserViewSet(UserViewSet):
-    # http_method_names = ('get', 'post')  # 'patch', 'delete',
-    queryset = CustomUser.objects.all()
+    
+    queryset = User.objects.all()
     serializer_class = CustomUserSerializer
 
     @action(
@@ -34,7 +38,7 @@ class CustomUserViewSet(UserViewSet):
     def subscribe(self, request, **kwargs):
         user = request.user
         author_id = self.kwargs.get('id')
-        author = get_object_or_404(CustomUser, id = author_id)
+        author = get_object_or_404(User, id = author_id)
 
         if request.method == 'POST':
             serializer = SubscribeSerializer(author,
@@ -51,7 +55,7 @@ class CustomUserViewSet(UserViewSet):
             subscription.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
     
-    # подумат над списком подписок
+
     @action(
         detail=False,
         # permission_classes=[IsAuthenticated]
@@ -59,13 +63,12 @@ class CustomUserViewSet(UserViewSet):
     )
     def subscriptions(self, request):
         user = request.user
-        queryset = CustomUser.objects.filter(following__subscriber=user)
+        queryset = User.objects.filter(following__subscriber=user)
         pages = self.paginate_queryset(queryset)
         serializer = SubscribeSerializer(pages,
                                          many=True,
                                          context={'request': request})
         return self.get_paginated_response(serializer.data)
-
 
 class TagViewSet(ModelViewSet):
     queryset = Tag.objects.all()
@@ -80,7 +83,8 @@ class IngredientViewSet(ModelViewSet):
 
 class RecipeViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
-    # serializer_class = RecipeSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = RecipeFilter
     
     def get_serializer_class(self):
         if self.request.method == 'POST' or self.request.method == 'PATCH':

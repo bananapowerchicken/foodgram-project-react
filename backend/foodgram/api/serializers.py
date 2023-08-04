@@ -8,17 +8,16 @@ from rest_framework.fields import IntegerField, SerializerMethodField
 from rest_framework.relations import PrimaryKeyRelatedField, SlugRelatedField
 
 from recipes.models import Ingredient, IngredientInRecipe, Recipe, Tag
-from users.models import CustomUser, Subscribe
+from users.models import Subscribe
 
 User = get_user_model()
 
-# сериалайзеры отвечают, например, за выводлимый вид в postman рез-та запроса
-
 class CustomUserCreateSerializer(UserCreateSerializer):
+
     class Meta:
-        model = CustomUser
-        fields = tuple(CustomUser.REQUIRED_FIELDS) + (
-            CustomUser.USERNAME_FIELD,
+        model = User
+        fields = tuple(User.REQUIRED_FIELDS) + (
+            User.USERNAME_FIELD,
             'password',
         )
 
@@ -26,7 +25,7 @@ class CustomUserSerializer(UserSerializer):
     is_subscribed = SerializerMethodField(read_only=True)
 
     class Meta:
-        model = CustomUser
+        model = User
         fields = (
             'email',
             'id',
