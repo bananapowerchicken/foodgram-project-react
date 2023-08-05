@@ -51,10 +51,8 @@ class Subscribe(models.Model):
     subscriber = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
-        related_name='follower'
-        )
+        related_name='follower')
     author = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
-        related_name='following'
-        )
+        related_name='following')

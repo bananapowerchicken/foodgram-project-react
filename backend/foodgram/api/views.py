@@ -104,20 +104,16 @@ class RecipeViewSet(ModelViewSet):
         return Response({'errors': 'Этого рецепта не существует'},
                         status=status.HTTP_400_BAD_REQUEST)
 
-    @action(
-            detail=True,
-            methods=['post', 'delete'],
-    )
+    @action(detail=True,
+            methods=['post', 'delete'])
     def favorite(self, request, pk):
         if request.method == 'POST':
             return self.add_to(Favorite, request.user, pk)
         else:
             return self.delete_from(Favorite, request.user, pk)
 
-    @action(
-            detail=True,
-            methods=['post', 'delete'],
-    )
+    @action(detail=True,
+            methods=['post', 'delete'])
     def shopping_cart(self, request, pk):
         if request.method == 'POST':
             return self.add_to(ShoppingCart, request.user, pk)
