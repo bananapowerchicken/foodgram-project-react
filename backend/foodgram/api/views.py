@@ -29,10 +29,8 @@ class CustomUserViewSet(UserViewSet):
     queryset = User.objects.all()
     serializer_class = CustomUserSerializer
 
-    @action(
-            detail=True,
-            methods=['post', 'delete'],
-    )
+    @action(detail=True,
+            methods=['post', 'delete'])
     def subscribe(self, request, **kwargs):
         user = request.user
         author_id = self.kwargs.get('id')
