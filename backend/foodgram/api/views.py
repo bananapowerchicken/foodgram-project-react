@@ -1,7 +1,8 @@
 from django.contrib.auth import get_user_model
 from django.db.models import Sum
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
@@ -10,24 +11,21 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-from .filters import RecipeFilter
-from django_filters.rest_framework import DjangoFilterBackend
-
 
 from recipes.models import (Favorite, Ingredient, IngredientInRecipe, Recipe,
                             ShoppingCart, Tag)
 from users.models import Subscribe
 
+from .filters import RecipeFilter
 from .serializers import (CustomUserSerializer, IngredientSerializer,
                           RecipeCreateSerializer, RecipeSerializer,
                           RecipeShortSerializer, SubscribeSerializer,
                           TagSerializer)
 
-
 User = get_user_model()
 
+
 class CustomUserViewSet(UserViewSet):
-    
     queryset = User.objects.all()
     serializer_class = CustomUserSerializer
 
@@ -38,28 +36,26 @@ class CustomUserViewSet(UserViewSet):
     def subscribe(self, request, **kwargs):
         user = request.user
         author_id = self.kwargs.get('id')
-        author = get_object_or_404(User, id = author_id)
+        author = get_object_or_404(User, id=author_id)
 
         if request.method == 'POST':
             serializer = SubscribeSerializer(author,
-                                            data=request.data,
-                                            context={"request": request})
+                                             data=request.data,
+                                             context={"request": request})
             serializer.is_valid(raise_exception=True)
             Subscribe.objects.create(subscriber=user, author=author)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        
+
         if request.method == 'DELETE':
             subscription = get_object_or_404(Subscribe,
                                              subscriber=user,
                                              author=author)
             subscription.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-    
 
     @action(
         detail=False,
-        # permission_classes=[IsAuthenticated]
-        methods = ['get']
+        methods=['get']
     )
     def subscriptions(self, request):
         user = request.user
@@ -70,29 +66,29 @@ class CustomUserViewSet(UserViewSet):
                                          context={'request': request})
         return self.get_paginated_response(serializer.data)
 
+
 class TagViewSet(ModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     pagination_class = None
 
+
 class IngredientViewSet(ModelViewSet):
     http_method_names = ('get')
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    # pagination_class = None
+
 
 class RecipeViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
-    
+
     def get_serializer_class(self):
         if self.request.method == 'POST' or self.request.method == 'PATCH':
-            return RecipeCreateSerializer            
+            return RecipeCreateSerializer
         return RecipeSerializer
-    
-    # serializer_class = get_serializer_class(self)
-    
+
     def add_to(self, model, user, pk):
         if model.objects.filter(user=user, recipe__id=pk).exists():
             return Response({'errors': 'Этот рецепт уже добавлен'},
@@ -119,7 +115,7 @@ class RecipeViewSet(ModelViewSet):
             return self.add_to(Favorite, request.user, pk)
         else:
             return self.delete_from(Favorite, request.user, pk)
-    
+
     @action(
             detail=True,
             methods=['post', 'delete'],
@@ -129,24 +125,16 @@ class RecipeViewSet(ModelViewSet):
             return self.add_to(ShoppingCart, request.user, pk)
         else:
             return self.delete_from(ShoppingCart, request.user, pk)
-    
+
     @staticmethod
     def getpdf(recipe_info, recipe_name):
-        # pdfmetrics.registerFont(
-
-            # TTFont( 'utf-8'))
-        # pdfmetrics.registerFont(TTFont('ExtraBold', 'extrabold.ttf', 'utf-8'))
         pdfmetrics.registerFont(TTFont('TNR', 'times.ttf'))
-        response = HttpResponse(content_type='application/pdf') 
-        response['Content-Disposition'] = 'attachment; filename="shopping-cart.pdf"' 
-        
-        p = canvas.Canvas(response)      
-        # p.add_font('DejaVuSans', 'DejaVuSans.ttf', 'utf-8')
-        p.setFont("TNR", 20) 
-        # p.drawString(150,900, "Shopping list")
-        
+        response = HttpResponse(content_type='application/pdf')
+
+        p = canvas.Canvas(response)
+        p.setFont("TNR", 20)
         text_object = p.beginText(100, 750)
-        # name_of_recipe = recipe_name.values()[0]
+
         text_object.textLine(f'Список ингредиентов для блюда {recipe_name}')
         counter = 1
         for ingredient, unit, amount in recipe_info:
@@ -155,31 +143,20 @@ class RecipeViewSet(ModelViewSet):
             )
             counter += 1
         p.drawText(text_object)
-        # text_object = p.beginText(100, 750)
-        # text_object.textLine(
-        #         # f'{counter}. {ingredient} ({unit}) - {amount}'
-        #         "hi barbie"
-        #     )
-
-        p.showPage() 
-        p.save() 
+        p.showPage()
+        p.save()
         return response
 
     @action(detail=False)
     def download_shopping_cart(self, request):
-        # recipe_info = IngredientInRecipe(pk=1)
-        # recipe_info = IngredientInRecipe.objects.filter(pk=1)
-        
         recipe_info = IngredientInRecipe.objects.filter(
             recipe__shopping_cart__user=request.user
         ).values_list(
             'ingredient__name', 'ingredient__measurement_unit'
         ).annotate(Sum('amount')).order_by('ingredient__name')
-        
+
         recipe_name = IngredientInRecipe.objects.filter(
             recipe__shopping_cart__user=request.user
         ).values('recipe__name').first()['recipe__name']
-
-        # recipe_name = recipe_name['recipe__name']
 
         return self.getpdf(recipe_info, recipe_name)

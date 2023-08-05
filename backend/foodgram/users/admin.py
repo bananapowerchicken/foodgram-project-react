@@ -7,6 +7,7 @@ from .models import CustomUser, Subscribe
 class UserAdmin(admin.ModelAdmin):
     list_display = ('email', 'username', 'first_name', 'last_name')
 
+
 @admin.register(Subscribe)
 class SubscribeAdmin(admin.ModelAdmin):
     pass
