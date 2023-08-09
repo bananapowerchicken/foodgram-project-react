@@ -106,17 +106,6 @@ class RecipeShortSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = ('id', 'name', 'image', 'cooking_time')
-    
-    # def validate(self, data):
-    #     # user = self.context.get('request').user
-    #     # if datauser.last_name == 'Пупкин':
-    #         raise ValidationError(
-    #             detail='AZAZAZAZAZA@!!!!!!!',
-    #             code=status.HTTP_400_BAD_REQUEST
-    #         )
-
-
-    #     # return data
 
 
 class RecipeSerializer(serializers.ModelSerializer):
@@ -156,7 +145,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = '__all__'
 
-    @transaction.atomic
+    @staticmethod
     def write_ingredients(self, recipe, ingredients):
         IngredientInRecipe.objects.bulk_create(
             [
@@ -189,7 +178,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         recipe.ingredient.clear()
         recipe.tags.set(tags)
         self.write_ingredients(recipe, ingredient)
-        
+
         return super().update(recipe, validated_data)
 
     def to_representation(self, instance):
