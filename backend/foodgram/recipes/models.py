@@ -25,7 +25,7 @@ class Recipe(models.Model):
     text = models.TextField()
     cooking_time = models.PositiveIntegerField(
         'Время приготовления рецепта',
-        validators=[MinValueValidator(1)])
+        validators=[MinValueValidator(1, 'Время готовки не меньше 1 минуты')])
     ingredient = models.ManyToManyField(Ingredient,
                                         through='IngredientInRecipe')
     image = models.ImageField(upload_to='recipes/')
@@ -54,6 +54,10 @@ class Favorite(models.Model):
     class Meta:
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранное'
+        constraints = [
+            UniqueConstraint(fields=['user', 'recipe'],
+                             name='unique_favorite')
+        ]
 
     def __str__(self):
         return f'{self.user} добавил "{self.recipe}" в Избранное'

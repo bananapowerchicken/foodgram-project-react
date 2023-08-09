@@ -1,12 +1,12 @@
 from django.contrib.auth import get_user_model
 from django.db.models import Sum
-from django.http import HttpResponse
+# from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.pdfgen import canvas
+# from reportlab.pdfbase import pdfmetrics
+# from reportlab.pdfbase.ttfonts import TTFont
+# from reportlab.pdfgen import canvas
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -21,6 +21,7 @@ from .serializers import (CustomUserSerializer, IngredientSerializer,
                           RecipeCreateSerializer, RecipeSerializer,
                           RecipeShortSerializer, SubscribeSerializer,
                           TagSerializer)
+from .utils import generate_pdf
 
 User = get_user_model()
 
@@ -88,12 +89,10 @@ class RecipeViewSet(ModelViewSet):
         return RecipeSerializer
 
     def add_to(self, model, user, pk):
-        if model.objects.filter(user=user, recipe__id=pk).exists():
-            return Response({'errors': 'Этот рецепт уже добавлен'},
-                            status=status.HTTP_400_BAD_REQUEST)
         recipe = get_object_or_404(Recipe, id=pk)
         model.objects.create(user=user, recipe=recipe)
-        serializer = RecipeShortSerializer(recipe)
+        serializer = RecipeShortSerializer(recipe, data=self.request.data)
+        # serializer.is_valid(raise_exception=True)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def delete_from(self, model, user, pk):
@@ -109,37 +108,14 @@ class RecipeViewSet(ModelViewSet):
     def favorite(self, request, pk):
         if request.method == 'POST':
             return self.add_to(Favorite, request.user, pk)
-        else:
-            return self.delete_from(Favorite, request.user, pk)
+        return self.delete_from(Favorite, request.user, pk)
 
     @action(detail=True,
             methods=['post', 'delete'])
     def shopping_cart(self, request, pk):
         if request.method == 'POST':
             return self.add_to(ShoppingCart, request.user, pk)
-        else:
-            return self.delete_from(ShoppingCart, request.user, pk)
-
-    @staticmethod
-    def getpdf(recipe_info, recipe_name):
-        pdfmetrics.registerFont(TTFont('TNR', 'times.ttf'))
-        response = HttpResponse(content_type='application/pdf')
-
-        p = canvas.Canvas(response)
-        p.setFont("TNR", 20)
-        text_object = p.beginText(100, 750)
-
-        text_object.textLine(f'Список ингредиентов для блюда {recipe_name}')
-        counter = 1
-        for ingredient, unit, amount in recipe_info:
-            text_object.textLine(
-                f'{counter}. {ingredient} ({unit}) - {amount}'
-            )
-            counter += 1
-        p.drawText(text_object)
-        p.showPage()
-        p.save()
-        return response
+        return self.delete_from(ShoppingCart, request.user, pk)
 
     @action(detail=False)
     def download_shopping_cart(self, request):
@@ -153,4 +129,4 @@ class RecipeViewSet(ModelViewSet):
             recipe__shopping_cart__user=request.user
         ).values('recipe__name').first()['recipe__name']
 
-        return self.getpdf(recipe_info, recipe_name)
+        return generate_pdf(recipe_info)

@@ -5,8 +5,9 @@ from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.fields import IntegerField, SerializerMethodField
+from django.db import transaction
 
-from recipes.models import Ingredient, IngredientInRecipe, Recipe, Tag
+from recipes.models import Ingredient, IngredientInRecipe, Recipe, Tag, Favorite
 from users.models import Subscribe
 
 User = get_user_model()
@@ -38,9 +39,9 @@ class CustomUserSerializer(UserSerializer):
 
     def get_is_subscribed(self, obj):
         user = self.context.get('request').user
-        if user.is_anonymous:
-            return False
-        return Subscribe.objects.filter(subscriber=user, author=obj).exists()
+
+        return (user.is_authenticated and 
+                Subscribe.objects.filter(subscriber=user, author=obj).exists())
 
 
 class SubscribeSerializer(CustomUserSerializer):
@@ -105,6 +106,17 @@ class RecipeShortSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = ('id', 'name', 'image', 'cooking_time')
+    
+    # def validate(self, data):
+    #     # user = self.context.get('request').user
+    #     # if datauser.last_name == 'Пупкин':
+    #         raise ValidationError(
+    #             detail='AZAZAZAZAZA@!!!!!!!',
+    #             code=status.HTTP_400_BAD_REQUEST
+    #         )
+
+
+    #     # return data
 
 
 class RecipeSerializer(serializers.ModelSerializer):
@@ -123,15 +135,15 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def get_is_favorited(self, obj):
         user = self.context.get('request').user
-        if user.is_anonymous:
-            return False
-        return user.favorites.filter(recipe=obj).exists()
+
+        return (user.is_authenticated and
+                user.favorites.filter(recipe=obj).exists())
 
     def get_is_in_shopping_cart(self, obj):
         user = self.context.get('request').user
-        if user.is_anonymous:
-            return False
-        return user.shopping_cart.filter(recipe=obj).exists()
+
+        return (user.is_authenticated and 
+                user.shopping_cart.filter(recipe=obj).exists())
 
 
 class RecipeCreateSerializer(serializers.ModelSerializer):
@@ -144,20 +156,31 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = '__all__'
 
+    @transaction.atomic
+    def write_ingredients(self, recipe, ingredients):
+        IngredientInRecipe.objects.bulk_create(
+            [
+                IngredientInRecipe(
+                    ingredient=get_object_or_404(Ingredient,
+                                                 id=ingredient['id']),
+                    recipe=recipe,
+                    amount=ingredient['amount']
+                ) for ingredient in ingredients
+            ]
+        )
+
+    @transaction.atomic
     def create(self, validated_data):
         ingredient = validated_data.pop('ingredient')
         tags = validated_data.pop('tags')
         author = self.context['request'].user
         recipe = Recipe.objects.create(author=author, **validated_data)
         recipe.tags.set(tags)
+        self.write_ingredients(recipe, ingredient)
 
-        for i in ingredient:
-            current_ingredient = get_object_or_404(Ingredient, id=i['id'])
-            IngredientInRecipe.objects.create(
-                ingredient=current_ingredient, recipe=recipe,
-                amount=i['amount'])
         return recipe
 
+    @transaction.atomic
     def update(self, recipe, validated_data):
         ingredient = validated_data.pop('ingredient')
         tags = validated_data.pop('tags')
@@ -165,17 +188,8 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         recipe.tags.clear()
         recipe.ingredient.clear()
         recipe.tags.set(tags)
-
-        IngredientInRecipe.objects.filter(
-            recipe=recipe,
-            ingredient__in=recipe.ingredient.all()).delete()
-
-        for i in ingredient:
-            current_ingredient = get_object_or_404(Ingredient,
-                                                   id=i['id'])
-            IngredientInRecipe.objects.create(
-                ingredient=current_ingredient, recipe=recipe,
-                amount=i['amount'])
+        self.write_ingredients(recipe, ingredient)
+        
         return super().update(recipe, validated_data)
 
     def to_representation(self, instance):
