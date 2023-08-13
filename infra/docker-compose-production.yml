@@ -14,11 +14,9 @@ services:
       - pg_data:/var/lib/postgresql/data
     ports:
       - 5432:5432
-  
+
   backend:
-    build:
-      context: ../backend
-      dockerfile: Dockerfile
+    image: bananapowerchicken/foodgram_backend
     depends_on:
       - db
     env_file:
@@ -28,16 +26,16 @@ services:
       - media:/app/media/
 
   frontend:
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
+    image: bananapowerchicken/foodgram_frontend
     volumes:
       - ../frontend/:/app/result_build/
-  
+
   nginx:
     image: nginx:1.19.3
     ports:
-      - 8000:80 
+      - 8000:80
+    depends_on:
+      - backend 
     volumes:
       - static:/nginx_static/
       - media:/app/media/
