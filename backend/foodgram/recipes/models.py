@@ -31,6 +31,11 @@ class Recipe(models.Model):
                                         through='IngredientInRecipe')
     image = models.ImageField(upload_to='recipes/')
 
+    class Meta:
+        ordering = ['-id']
+        verbose_name = 'Рецепт'
+        verbose_name_plural = 'Рецепты'
+
 
 class IngredientInRecipe(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)

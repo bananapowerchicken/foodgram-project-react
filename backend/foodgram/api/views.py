@@ -18,6 +18,7 @@ from .serializers import (CustomUserSerializer, IngredientSerializer,
                           RecipeShortSerializer, SubscribeSerializer,
                           TagSerializer)
 from .utils import generate_pdf
+from api.pagination import LimitPageNumberPagination
 
 User = get_user_model()
 
@@ -80,6 +81,7 @@ class RecipeViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
+    pagination_class = LimitPageNumberPagination
 
     def get_serializer_class(self):
         if self.request.method == 'POST' or self.request.method == 'PATCH':
