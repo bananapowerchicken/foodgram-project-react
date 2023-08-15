@@ -21,7 +21,7 @@ class Ingredient(models.Model):
 
 class Recipe(models.Model):
     tags = models.ManyToManyField(Tag)
-    author = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, null=True, related_name='recipes')
     name = models.CharField(max_length=200)
     text = models.TextField()
     cooking_time = models.PositiveIntegerField(

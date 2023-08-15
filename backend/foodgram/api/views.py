@@ -26,6 +26,7 @@ User = get_user_model()
 class CustomUserViewSet(UserViewSet):
     queryset = User.objects.all()
     serializer_class = CustomUserSerializer
+    pagination_class = LimitPageNumberPagination
 
     @action(detail=True,
             methods=['post', 'delete'])
