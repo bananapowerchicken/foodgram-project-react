@@ -27,12 +27,12 @@ class Recipe(models.Model):
     cooking_time = models.PositiveIntegerField(
         'Время приготовления рецепта',
         validators=[MinValueValidator(1, 'Время готовки не меньше 1 минуты')])
-    ingredient = models.ManyToManyField(Ingredient,
+    ingredients = models.ManyToManyField(Ingredient,
                                         through='IngredientInRecipe')
     image = models.ImageField(upload_to='recipes/')
 
     class Meta:
-        ordering = ['-id']
+        # ordering = ['-id']
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
 

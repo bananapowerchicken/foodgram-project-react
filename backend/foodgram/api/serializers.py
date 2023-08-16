@@ -84,7 +84,6 @@ class SubscribeSerializer(CustomUserSerializer):
         return serializer.data
 
 
-
 class TagSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -128,7 +127,7 @@ class RecipeShortSerializer(serializers.ModelSerializer):
 
 class RecipeSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True)
-    ingredient = IngredientInRecipeSerializer(many=True,
+    ingredients = IngredientInRecipeSerializer(many=True,
                                               source='ingredientinrecipe_set')
 
     image = Base64ImageField()
@@ -155,7 +154,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
 class RecipeCreateSerializer(serializers.ModelSerializer):
 
-    ingredient = IngredientInRecipeWriteSerializer(many=True)
+    ingredients = IngredientInRecipeWriteSerializer(many=True)
     image = Base64ImageField()
     author = CustomUserSerializer(read_only=True)
 
@@ -164,7 +163,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     @staticmethod
-    def write_ingredients(self, recipe, ingredients):
+    def write_ingredients(recipe, ingredients):
         IngredientInRecipe.objects.bulk_create(
             [
                 IngredientInRecipe(
@@ -178,24 +177,24 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
     @transaction.atomic
     def create(self, validated_data):
-        ingredient = validated_data.pop('ingredient')
+        ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
         author = self.context['request'].user
         recipe = Recipe.objects.create(author=author, **validated_data)
         recipe.tags.set(tags)
-        self.write_ingredients(recipe, ingredient)
+        self.write_ingredients(recipe=recipe, ingredients=ingredients)
 
         return recipe
 
     @transaction.atomic
     def update(self, recipe, validated_data):
-        ingredient = validated_data.pop('ingredient')
+        ingredients = validated_data.pop('ingredient')
         tags = validated_data.pop('tags')
 
         recipe.tags.clear()
-        recipe.ingredient.clear()
+        recipe.ingredients.clear()
         recipe.tags.set(tags)
-        self.write_ingredients(recipe, ingredient)
+        self.write_ingredients(recipe, ingredients)
 
         return super().update(recipe, validated_data)
 

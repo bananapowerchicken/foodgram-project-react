@@ -127,8 +127,4 @@ class RecipeViewSet(ModelViewSet):
             'ingredient__name', 'ingredient__measurement_unit'
         ).annotate(Sum('amount')).order_by('ingredient__name')
 
-        recipe_name = IngredientInRecipe.objects.filter(
-            recipe__shopping_cart__user=request.user
-        ).values('recipe__name').first()['recipe__name']
-
         return generate_pdf(recipe_info)
