@@ -6,11 +6,11 @@ from django.http import HttpResponse
 
 
 def generate_pdf(recipe_info):
-    pdfmetrics.registerFont(TTFont('TNR', 'times.ttf'))
+    pdfmetrics.registerFont(TTFont('DejaVuSerif', 'DejaVuSerif.ttf'))
     response = HttpResponse(content_type='application/pdf')
 
     p = canvas.Canvas(response)
-    p.setFont("TNR", 20)
+    p.setFont('DejaVuSerif', 20)
     text_object = p.beginText(100, 750)
 
     text_object.textLine('Список ингредиентов для блюд из корзины')
