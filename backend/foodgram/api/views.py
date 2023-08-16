@@ -93,7 +93,7 @@ class RecipeViewSet(ModelViewSet):
     def add_to(self, model, user, pk):
         recipe = get_object_or_404(Recipe, id=pk)
         model.objects.create(user=user, recipe=recipe)
-        serializer = RecipeShortSerializer(recipe, data=self.request.data)
+        serializer = RecipeShortSerializer(recipe) #, data=self.request.data)
         # serializer.is_valid(raise_exception=True)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
