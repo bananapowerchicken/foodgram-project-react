@@ -54,7 +54,7 @@ class SubscribeSerializer(CustomUserSerializer):
             'recipes'
         )
         read_only_fields = ('email', 'username', 'first_name',
-                            'last_name',)
+                            'last_name', )
 
     def validate(self, data):
         author = self.instance
