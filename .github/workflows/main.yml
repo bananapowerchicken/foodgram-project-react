@@ -2,9 +2,10 @@ name: Main Foodgram workflow
 
 on:
   push:
-    branches: [ master ]
+    branches: master
     paths-ignore:
       - '**/README.md'
+      - 'backend/foodgram/users/migrations/'
 
 jobs:
 
