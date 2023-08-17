@@ -32,7 +32,7 @@ class Recipe(models.Model):
     image = models.ImageField(upload_to='recipes/')
 
     class Meta:
-        # ordering = ['-id']
+        ordering = ['-id']
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
 

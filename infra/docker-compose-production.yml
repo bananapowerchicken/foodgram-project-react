@@ -9,18 +9,16 @@ services:
   db:
     image: postgres:13.10
     env_file:
-      - ../.env
+      - .env
     volumes:
       - pg_data:/var/lib/postgresql/data
-    ports:
-      - 5432:5432
 
   backend:
     image: bananapowerchicken/foodgram_backend
     depends_on:
       - db
     env_file:
-      - ../.env
+      - .env
     volumes:
       - static:/backend_static
       - media:/app/media/
@@ -33,7 +31,7 @@ services:
   nginx:
     image: nginx:1.19.3
     ports:
-      - 8000:80
+      - 80:80
     depends_on:
       - backend 
     volumes:
