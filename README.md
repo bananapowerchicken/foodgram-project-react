@@ -15,6 +15,7 @@ Python, Django, Django Rest Framework, Docker, Gunicorn, NGINX, PostgreSQL, Cont
 ### Данные администратора на удаленном сервере для ревью
 
 email: admin1@yap.com
+
 password: adminpassword1
 
 ### Запуск проекта на удаленном сервере:
