@@ -52,7 +52,7 @@ class Subscribe(models.Model):
         CustomUser,
         on_delete=models.CASCADE,
         related_name='follower')
-    
+
     author = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,

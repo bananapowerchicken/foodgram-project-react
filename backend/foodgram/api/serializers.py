@@ -7,7 +7,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.fields import IntegerField, SerializerMethodField
 from django.db import transaction
 
-from recipes.models import Ingredient, IngredientInRecipe, Recipe, Tag, Favorite
+from recipes.models import Ingredient, IngredientInRecipe, Recipe, Tag
 from users.models import Subscribe
 
 User = get_user_model()
@@ -40,7 +40,7 @@ class CustomUserSerializer(UserSerializer):
     def get_is_subscribed(self, obj):
         user = self.context.get('request').user
 
-        return (user.is_authenticated and 
+        return (user.is_authenticated and
                 Subscribe.objects.filter(subscriber=user, author=obj).exists())
 
 
@@ -128,7 +128,7 @@ class RecipeShortSerializer(serializers.ModelSerializer):
 class RecipeSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True)
     ingredients = IngredientInRecipeSerializer(many=True,
-                                              source='ingredientinrecipe_set')
+                                               source='ingredientinrecipe_set')
 
     image = Base64ImageField()
     author = CustomUserSerializer(read_only=True)
@@ -148,7 +148,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     def get_is_in_shopping_cart(self, obj):
         user = self.context.get('request').user
 
-        return (user.is_authenticated and 
+        return (user.is_authenticated and
                 user.shopping_cart.filter(recipe=obj).exists())
 
 

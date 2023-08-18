@@ -21,14 +21,15 @@ class Ingredient(models.Model):
 
 class Recipe(models.Model):
     tags = models.ManyToManyField(Tag)
-    author = models.ForeignKey(User, on_delete=models.CASCADE, null=True, related_name='recipes')
+    author = models.ForeignKey(User, on_delete=models.CASCADE, null=True,
+                               related_name='recipes')
     name = models.CharField(max_length=200)
     text = models.TextField()
     cooking_time = models.PositiveIntegerField(
         'Время приготовления рецепта',
         validators=[MinValueValidator(1, 'Время готовки не меньше 1 минуты')])
     ingredients = models.ManyToManyField(Ingredient,
-                                        through='IngredientInRecipe')
+                                         through='IngredientInRecipe')
     image = models.ImageField(upload_to='recipes/')
 
     class Meta:
