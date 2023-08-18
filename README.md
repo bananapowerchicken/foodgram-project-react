@@ -1,7 +1,5 @@
 ## Проект Foodgram
 
-![workflow](https://github.com/mikhailsoldatkin/foodgram-project-react/actions/workflows/foodgram_workflow.yml/badge.svg)
-
 Foodgram - это простой сервис с кулинарными рецептами. Позволяет  добавлять и публиковать рецепты, сохранять избранные, а также скачивать список покупок для выбранных рецептов. Есть подписка на авторов.
 
 Проект доступен по [адресу](http://51.250.28.193/)
@@ -13,6 +11,11 @@ Foodgram - это простой сервис с кулинарными реце
 ### Использованные Технологии:
 
 Python, Django, Django Rest Framework, Docker, Gunicorn, NGINX, PostgreSQL, Continuous Integration, Continuous Deployment
+
+### Данные администратора на удаленном сервере для ревью
+
+email: admin1@yap.com
+password: adminpassword1
 
 ### Запуск проекта на удаленном сервере:
 
