@@ -22,8 +22,8 @@ sudo apt-get install docker-compose-plugin              # last version of docker
 - Copy the files docker-compose.yml, nginx.conf from the infra folder and the docs folder to the server on the same level as the foodgram folder (manually or via ssh), for example:
 
 ```
-scp docker-compose.yml nginx.conf username@IP:/home/username/   # username - имя пользователя на сервере
-                                                                # IP - публичный IP сервера
+scp docker-compose.yml nginx.conf username@IP:/home/username/   # username - user name on server
+                                                                # IP - public server IP
 ```
 
 - To work with GitHub Actions, you need to create environment variables in the repository in the Secrets > Actions section:
