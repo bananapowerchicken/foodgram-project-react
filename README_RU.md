@@ -93,7 +93,14 @@ sudo docker compose stop         # без удаления
 
 - Клонировать репозиторий:
 ```
-git@github.com:bananapowerchicken/foodgram-project-react.git
+git clone git@github.com:bananapowerchicken/foodgram-project-react.git
+```
+
+- В папке backend создать виртуальное окружение, активировать его и установить в него зависимости из файла requirements.txt
+```
+python -m venv venv
+source venv/Scripts/activate
+pip install -r requirements.txt 
 ```
 
 - В директории infra файл создать файл .env и заполнить своими данными по нижеприведенному примеру:
@@ -109,8 +116,41 @@ SECRET_KEY='секретный ключ Django'
 
 - Создать и запустить контейнеры Docker, последовательно выполнить команды по созданию миграций, сбору статики, 
 созданию суперпользователя, как указано выше.
+
+- Создать и запустить контейнеры Docker из папки infra
 ```
-docker-compose -f docker-compose.yml up -d
+docker compose -f docker-compose.yml up -d
+```
+
+- После успешной сборки создать и выполнить миграции:
+```
+docker compose -f docker-compose.yml exec backend python manage.py makemigrations
+docker compose -f docker-compose.yml exec backend python manage.py migrate
+```
+
+- Создать суперпользователя:
+```
+sudo docker compose exec backend python manage.py createsuperuser
+```
+
+- Собрать статику:
+```
+docker compose -f docker-compose.yml exec backend python manage.py collectstatic
+```
+
+- Скопировать статику в контейнер backend:
+```
+docker compose -f docker-compose.yml exec backend bash
+cp -r static/. ../backend_static/static/
+
+```
+
+- Наполнить базу данных содержимым из файла ingredients.json:
+```
+docker compose -f docker-compose.yml exec backend bash
+shell
+from scripts.load_csv import load_ingredients
+load_ingredients('data/ingredients.csv')
 ```
 
 
