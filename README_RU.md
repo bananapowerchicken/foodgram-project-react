@@ -148,7 +148,7 @@ cp -r static/. ../backend_static/static/
 - Наполнить базу данных содержимым из файла ingredients.json:
 ```
 docker compose -f docker-compose.yml exec backend bash
-shell
+python manage.py shell
 from scripts.load_csv import load_ingredients
 load_ingredients('data/ingredients.csv')
 ```
