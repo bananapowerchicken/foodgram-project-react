@@ -153,6 +153,11 @@ from scripts.load_csv import load_ingredients
 load_ingredients('data/ingredients.csv')
 ```
 
+- Выйти из shell и из bash:
+```
+exit()
+exit
+```
 
 - После запуска проект будут доступен по адресу: [http://localhost/](http://localhost/)
 
