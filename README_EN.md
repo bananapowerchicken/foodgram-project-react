@@ -93,10 +93,17 @@ sudo docker compose stop         # without deleting
 
 - Clone repo:
 ```
-git@github.com:bananapowerchicken/foodgram-project-react.git
+git clone git@github.com:bananapowerchicken/foodgram-project-react.git
 ```
 
-- n the infra file directory, create a .env file and fill it with your data according to the example below:
+- Create a virtual environment in the backend folder, activate it and install dependencies from the requirements.txt file into it:
+```
+python -m venv venv
+source venv/Scripts/activate
+pip install -r requirements.txt
+```
+
+- In the infra file directory, create a .env file and fill it with your data according to the example below:
 ```
 DB_ENGINE=django.db.backends.postgresql
 DB_NAME=postgres
@@ -107,12 +114,46 @@ DB_PORT=5432
 SECRET_KEY='secret Django key'
 ```
 
-- Create and run Docker containers, sequentially execute commands to create migrations, collect statics,
-creating a superuser as above.
+- Create and run Docker containers from the infra folder:
 ```
-docker-compose -f docker-compose.yml up -d
+docker compose -f docker-compose.yml up -d
 ```
 
+- After a successful build, create and run migrations::
+```
+docker compose -f docker-compose.yml exec backend python manage.py makemigrations
+docker compose -f docker-compose.yml exec backend python manage.py migrate
+```
+
+- Create superuser:
+```
+docker compose exec backend python manage.py createsuperuser
+```
+
+- Collect statics:
+```
+docker compose -f docker-compose.yml exec backend python manage.py collectstatic
+```
+
+- Copy statics to the backend container:
+```
+docker compose -f docker-compose.yml exec backend bash
+cp -r static/. ../backend_static/static/
+```
+
+- Fill the database with content from the ingredients.json file:
+```
+docker compose -f docker-compose.yml exec backend bash
+python manage.py shell
+from scripts.load_csv import load_ingredients
+load_ingredients('data/ingredients.csv')
+```
+
+- Exit shell and bash:
+```
+exit()
+exit
+```
 
 - After launch, the project will be available at: [http://localhost/](http://localhost/)
 
